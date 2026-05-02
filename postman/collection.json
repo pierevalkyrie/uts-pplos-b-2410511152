@@ -1,0 +1,274 @@
+{
+    "info": {
+        "name": "Sistem Donor Darah API - UTS PPLOS",
+        "description": "Koleksi API Postman untuk UTS Microservices Sistem Donor Darah yang disesuaikan dari file collection sebelumnya.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8000",
+            "type": "string"
+        },
+        {
+            "key": "jwt_token",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "1. Auth Service",
+            "item": [
+                {
+                    "name": "Register User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Piere Valkyrie\",\n  \"email\": \"piere@mail.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const res = pm.response.json();",
+                                    "// Menangkap access_token dari response dan menyimpannya ke variabel jwt_token secara otomatis",
+                                    "if (res.access_token) {",
+                                    "  pm.collectionVariables.set('jwt_token', res.access_token);",
+                                    "  console.log('Token berhasil disimpan secara otomatis!');",
+                                    "} else if (res.data && res.data.access_token) {",
+                                    "  pm.collectionVariables.set('jwt_token', res.data.access_token);",
+                                    "  console.log('Token (dari format bersarang) berhasil disimpan otomatis!');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"piere@mail.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "OAuth Google",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/oauth/google",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "oauth",
+                                "google"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Donor Service (Laravel)",
+            "item": [
+                {
+                    "name": "Cek Stok Darah (Public)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/stocks",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "stocks"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Request Service (Node+Mongo)",
+            "item": [
+                {
+                    "name": "Request Darah (Protected)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"hospital_name\": \"RSUP Persahabatan\",\n  \"blood_group\": \"AB\",\n  \"rhesus\": \"+\",\n  \"volume_ml\": 1000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/requests",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "requests"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Lihat Riwayat Request (Protected)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{jwt_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/requests",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "requests"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Health Checks",
+            "item": [
+                {
+                    "name": "Gateway Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Auth Service Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3001/health",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3001",
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Donor Service Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3002/api/health",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3002",
+                            "path": [
+                                "api",
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Request Service Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3003/health",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "3003",
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
